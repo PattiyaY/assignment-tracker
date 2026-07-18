@@ -10,5 +10,8 @@ export default async function RedirectPage() {
   if (session?.user.role === "TEACHER") {
     redirect("/dashboard");
   }
+  if (session?.user.role === "ADMIN") {
+    redirect("/admin/teachers");
+  }
   redirect("/login");
 }

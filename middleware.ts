@@ -13,9 +13,11 @@ export default withAuth(
     // Plain /classrooms/:id is shared — a student may view their own
     // classroom read-only, which the page itself verifies by id.
     const isTeacherOnly =
-      pathname.startsWith("/dashboard") || /^\/classrooms\/[^/]+\/settings/.test(pathname);
+      pathname.startsWith("/dashboard") ||
+      /^\/classrooms\/[^/]+\/settings/.test(pathname);
 
-    if (isTeacherOnly && role !== "TEACHER") {
+    const isAdminLike = role === "TEACHER" || role === "ADMIN";
+    if (isTeacherOnly && !isAdminLike) {
       return NextResponse.redirect(new URL("/login", req.url));
     }
 
@@ -26,7 +28,7 @@ export default withAuth(
       authorized: ({ token }) => !!token,
     },
     pages: { signIn: "/login" },
-  }
+  },
 );
 
 export const config = {

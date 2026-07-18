@@ -5,7 +5,18 @@ import { prisma } from "@/lib/prisma";
 /** Throws unless the caller is a signed-in teacher. Returns the teacher's user id. */
 export async function requireTeacher() {
   const session = await getServerSession(authOptions);
-  if (!session || session.user.role !== "TEACHER") {
+  if (
+    !session ||
+    (session.user.role !== "TEACHER" && session.user.role !== "ADMIN")
+  ) {
+    throw new Error("Not authorized");
+  }
+  return session.user.id;
+}
+
+export async function requireAdmin() {
+  const session = await getServerSession(authOptions);
+  if (!session || session.user.role !== "ADMIN") {
     throw new Error("Not authorized");
   }
   return session.user.id;
@@ -14,7 +25,9 @@ export async function requireTeacher() {
 /** Throws unless the signed-in teacher owns this classroom. */
 export async function requireClassroomOwner(classroomId: string) {
   const teacherId = await requireTeacher();
-  const classroom = await prisma.classroom.findUnique({ where: { id: classroomId } });
+  const classroom = await prisma.classroom.findUnique({
+    where: { id: classroomId },
+  });
   if (!classroom || classroom.teacherId !== teacherId) {
     throw new Error("Not authorized");
   }
@@ -28,16 +41,28 @@ export async function requireClassroomOwner(classroomId: string) {
  */
 export async function requireClassroomAccess(classroomId: string) {
   const session = await getServerSession(authOptions);
-  if (!session) throw new Error("Not authorized");
+  const classroom = await prisma.classroom.findUnique({
+    where: { id: classroomId },
+  });
+  if (!classroom) throw new Error("Not authorized");
+
+  if (!session) {
+    return { session: null, canEdit: false as const };
+  }
 
   if (session.user.role === "TEACHER") {
-    const classroom = await prisma.classroom.findUnique({ where: { id: classroomId } });
-    if (!classroom || classroom.teacherId !== session.user.id) throw new Error("Not authorized");
+    if (classroom.teacherId !== session.user.id)
+      throw new Error("Not authorized");
     return { session, canEdit: true as const };
   }
 
   if (session.user.role === "STUDENT") {
-    if (session.user.classroomId !== classroomId) throw new Error("Not authorized");
+    if (session.user.classroomId !== classroomId)
+      throw new Error("Not authorized");
+    return { session, canEdit: false as const };
+  }
+
+  if (session.user.role === "ADMIN") {
     return { session, canEdit: false as const };
   }
 

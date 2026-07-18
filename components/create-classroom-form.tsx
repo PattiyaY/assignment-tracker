@@ -32,7 +32,7 @@ export default function CreateClassroomForm() {
   if (!open) {
     return (
       <button className="btn btn-primary" onClick={() => setOpen(true)}>
-        + New classroom
+        + ห้องเรียนใหม่
       </button>
     );
   }
@@ -40,10 +40,10 @@ export default function CreateClassroomForm() {
   return (
     <form onSubmit={onSubmit} className="card p-5 flex flex-col gap-3 max-w-md">
       <div>
-        <label className="label block mb-1.5">Class name</label>
+        <label className="label block mb-1.5">ชื่อห้องเรียน</label>
         <input
           className="input"
-          placeholder="e.g. Grade 9 — Biology"
+          placeholder="เช่น ชั้นมัธยมศึกษาปีที่ 1 — ชีววิทยา"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
@@ -51,10 +51,10 @@ export default function CreateClassroomForm() {
         />
       </div>
       <div>
-        <label className="label block mb-1.5">Subject (optional)</label>
+        <label className="label block mb-1.5">วิชา (ไม่บังคับ)</label>
         <input
           className="input"
-          placeholder="e.g. Biology"
+          placeholder="เช่น ชีววิทยา"
           value={subject}
           onChange={(e) => setSubject(e.target.value)}
         />
@@ -62,10 +62,14 @@ export default function CreateClassroomForm() {
       {error && <p className="text-sm text-clay">{error}</p>}
       <div className="flex gap-2 pt-1">
         <button type="submit" disabled={loading} className="btn btn-primary">
-          {loading ? "Creating…" : "Create classroom"}
+          {loading ? "กำลังสร้าง…" : "สร้างห้องเรียน"}
         </button>
-        <button type="button" className="btn btn-secondary" onClick={() => setOpen(false)}>
-          Cancel
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => setOpen(false)}
+        >
+          ยกเลิก
         </button>
       </div>
     </form>

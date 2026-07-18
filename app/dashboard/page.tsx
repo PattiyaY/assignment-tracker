@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import NavBar from "@/components/nav-bar";
 import CreateClassroomForm from "@/components/create-classroom-form";
+import ClassroomSearch from "@/components/classroom-search";
 
 function pct(n: number) {
   return `${Math.round(n * 100)}%`;
@@ -30,17 +30,29 @@ export default async function DashboardPage() {
     select: { checked: true, column: { select: { classroomId: true } } },
   });
 
-  const statsByClassroom = new Map<string, { checked: number; total: number }>();
+  const statsByClassroom = new Map<
+    string,
+    { checked: number; total: number }
+  >();
   for (const c of classrooms) {
-    statsByClassroom.set(c.id, { checked: 0, total: c.students.length * c.columns.length });
+    statsByClassroom.set(c.id, {
+      checked: 0,
+      total: c.students.length * c.columns.length,
+    });
   }
   for (const s of submissions) {
     const entry = statsByClassroom.get(s.column.classroomId);
     if (entry && s.checked) entry.checked += 1;
   }
 
-  const totalChecked = [...statsByClassroom.values()].reduce((a, b) => a + b.checked, 0);
-  const totalPossible = [...statsByClassroom.values()].reduce((a, b) => a + b.total, 0);
+  const totalChecked = [...statsByClassroom.values()].reduce(
+    (a, b) => a + b.checked,
+    0,
+  );
+  const totalPossible = [...statsByClassroom.values()].reduce(
+    (a, b) => a + b.total,
+    0,
+  );
   const overallRate = totalPossible > 0 ? totalChecked / totalPossible : 0;
   const totalStudents = classrooms.reduce((a, c) => a + c._count.students, 0);
   const totalAssignments = classrooms.reduce((a, c) => a + c._count.columns, 0);
@@ -49,80 +61,66 @@ export default async function DashboardPage() {
     <div>
       <NavBar userName={session!.user.name ?? "Teacher"} role="TEACHER" />
       <main className="max-w-6xl mx-auto px-6 py-10">
-        <p className="label text-clay mb-2">Overview</p>
+        <p className="label text-clay mb-2">overview</p>
         <h1 className="font-display text-3xl mb-8">Dashboard</h1>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-          <StatCard label="Classrooms" value={String(classrooms.length)} />
-          <StatCard label="Students" value={String(totalStudents)} />
-          <StatCard label="Assignments" value={String(totalAssignments)} />
+          <StatCard label="ห้องเรียน" value={String(classrooms.length)} />
+          <StatCard label="นักเรียน" value={String(totalStudents)} />
+          <StatCard label="งานที่ต้องส่ง" value={String(totalAssignments)} />
           <StatCard
-            label="Overall submit rate"
+            label="อัตราการส่งรวม"
             value={totalPossible > 0 ? pct(overallRate) : "—"}
             accent
           />
         </div>
 
         <div className="flex items-center justify-between mb-4">
-          <h2 className="font-display text-xl">Your classrooms</h2>
+          {/* <div className="flex items-center justify-between mb-4">
+            <h2 className="font-display text-xl">ห้องเรียนของคุณ</h2>
+          </div> */}
         </div>
-
-        <div className="mb-6">
-          <CreateClassroomForm />
-        </div>
-
         {classrooms.length === 0 ? (
           <div className="card p-8 text-center text-muted">
-            No classrooms yet. Create your first one above — you'll be able to add
-            students and assignments right after.
+            ยังไม่มีห้องเรียนเลย
+            สร้างห้องเรียนแรกจากด้านบนแล้วคุณจะเพิ่มนักเรียนและงานที่ต้องส่งได้ทันที
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 gap-4">
-            {classrooms.map((c) => {
+          <ClassroomSearch
+            classrooms={classrooms.map((c) => {
               const stat = statsByClassroom.get(c.id)!;
               const rate = stat.total > 0 ? stat.checked / stat.total : 0;
-              return (
-                <Link
-                  key={c.id}
-                  href={`/classrooms/${c.id}`}
-                  className="card p-5 hover:border-mossdark transition-colors block"
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h3 className="font-display text-lg">{c.name}</h3>
-                      {c.subject && <p className="text-sm text-muted">{c.subject}</p>}
-                    </div>
-                    <span className="font-mono text-xs text-muted">{c._count.students} students</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1 h-2 rounded-full bg-line overflow-hidden">
-                      <div
-                        className="h-full bg-moss"
-                        style={{ width: `${Math.round(rate * 100)}%` }}
-                      />
-                    </div>
-                    <span className="font-mono text-xs text-muted w-10 text-right">
-                      {stat.total > 0 ? pct(rate) : "—"}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted mt-2">
-                    {c._count.columns} assignment{c._count.columns === 1 ? "" : "s"} tracked
-                  </p>
-                </Link>
-              );
+              return {
+                id: c.id,
+                name: c.name,
+                subject: c.subject,
+                studentCount: c._count.students,
+                columnCount: c._count.columns,
+                progressPercent: stat.total > 0 ? Math.round(rate * 100) : 0,
+              };
             })}
-          </div>
+          />
         )}
       </main>
     </div>
   );
 }
 
-function StatCard({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
+function StatCard({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: string;
+  accent?: boolean;
+}) {
   return (
     <div className="card p-4">
       <p className="label mb-1">{label}</p>
-      <p className={`font-display text-2xl ${accent ? "text-mossdark" : ""}`}>{value}</p>
+      <p className={`font-display text-2xl ${accent ? "text-mossdark" : ""}`}>
+        {value}
+      </p>
     </div>
   );
 }

@@ -9,7 +9,11 @@ import NavBar from "@/components/nav-bar";
 import EditClassroomForm from "@/components/edit-classroom-form";
 import ManageStudents from "@/components/manage-students";
 
-export default async function ClassroomSettingsPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ClassroomSettingsPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   try {
     await requireClassroomOwner(id);
@@ -33,14 +37,17 @@ export default async function ClassroomSettingsPage({ params }: { params: Promis
     <div>
       <NavBar userName={session!.user.name ?? "Teacher"} role="TEACHER" />
       <main className="max-w-4xl mx-auto px-6 py-10">
-        <Link href={`/classrooms/${classroom.id}`} className="text-sm text-muted hover:text-mossdark">
-          ← Back to roster
+        <Link
+          href={`/classrooms/${classroom.id}`}
+          className="text-sm text-muted hover:text-mossdark"
+        >
+          ← กลับไปยังแผงรายชื่อ
         </Link>
-        <p className="label text-clay mt-4 mb-2">Manage</p>
+        <p className="label text-clay mt-4 mb-2">จัดการ</p>
         <h1 className="font-display text-3xl mb-8">{classroom.name}</h1>
 
         <section className="mb-10">
-          <h2 className="font-display text-lg mb-3">Classroom details</h2>
+          <h2 className="font-display text-lg mb-3">รายละเอียดห้องเรียน</h2>
           <EditClassroomForm
             classroomId={classroom.id}
             initialName={classroom.name}
@@ -49,22 +56,20 @@ export default async function ClassroomSettingsPage({ params }: { params: Promis
         </section>
 
         <section>
-          <h2 className="font-display text-lg mb-1">Students</h2>
+          <h2 className="font-display text-lg mb-1">นักเรียน</h2>
           <p className="text-sm text-muted mb-4">
-            Each student gets a private link — sending it to them is all they need
-            to view their own progress. No student passwords to manage. Add an
-            optional PIN if a class shares a computer.
+            ใช้ลิงก์เดียวสำหรับทั้งห้องเรียน
+            เพื่อให้นักเรียนเข้าดูห้องเรียนได้ง่าย
           </p>
           <ManageStudents
             classroomId={classroom.id}
+            joinCode={classroom.joinCode}
             siteUrl={siteUrl}
             students={classroom.students.map((s) => ({
               id: s.id,
               number: s.number,
               name: s.name,
               email: s.email,
-              accessToken: s.accessToken,
-              hasPin: !!s.pinHash,
             }))}
           />
         </section>

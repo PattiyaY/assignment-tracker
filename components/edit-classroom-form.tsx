@@ -40,31 +40,52 @@ export default function EditClassroomForm({
     <div className="card p-5 max-w-md">
       <form onSubmit={onSubmit} className="flex flex-col gap-3">
         <div>
-          <label className="label block mb-1.5">Class name</label>
-          <input className="input" value={name} onChange={(e) => setName(e.target.value)} required />
+          <label className="label block mb-1.5">ชื่อห้องเรียน</label>
+          <input
+            className="input"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
         </div>
         <div>
-          <label className="label block mb-1.5">Subject</label>
-          <input className="input" value={subject} onChange={(e) => setSubject(e.target.value)} />
+          <label className="label block mb-1.5">วิชา</label>
+          <input
+            className="input"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+          />
         </div>
         <div className="flex items-center gap-3">
           <button type="submit" disabled={saving} className="btn btn-primary">
-            {saving ? "Saving…" : "Save changes"}
+            {saving ? "กำลังบันทึก…" : "บันทึกการเปลี่ยนแปลง"}
           </button>
-          {saved && <span className="text-sm text-mossdark">Saved.</span>}
+          {saved && <span className="text-sm text-mossdark">บันทึกแล้ว</span>}
         </div>
       </form>
 
       <div className="border-t border-line mt-5 pt-4">
         {confirmingDelete ? (
           <div className="flex items-center gap-3">
-            <span className="text-sm text-clay">Delete this classroom and all its data?</span>
-            <button className="btn btn-danger" onClick={onDelete}>Yes, delete</button>
-            <button className="btn btn-secondary" onClick={() => setConfirmingDelete(false)}>Cancel</button>
+            <span className="text-sm text-clay">
+              ลบห้องเรียนและข้อมูลทั้งหมดนี้?
+            </span>
+            <button className="btn btn-danger" onClick={onDelete}>
+              ใช่ ลบเลย
+            </button>
+            <button
+              className="btn btn-secondary"
+              onClick={() => setConfirmingDelete(false)}
+            >
+              ยกเลิก
+            </button>
           </div>
         ) : (
-          <button className="btn btn-danger" onClick={() => setConfirmingDelete(true)}>
-            Delete classroom
+          <button
+            className="btn btn-danger"
+            onClick={() => setConfirmingDelete(true)}
+          >
+            ลบห้องเรียน
           </button>
         )}
       </div>
