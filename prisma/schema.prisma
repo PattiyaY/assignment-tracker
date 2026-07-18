@@ -1,0 +1,83 @@
+// ClassTrack data model
+// Run `npm run db:push` (quick, prototyping) or `npm run db:migrate` (versioned) after editing.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  TEACHER
+  STUDENT
+}
+
+// A teacher account. Students do NOT get a User row — they authenticate
+// via a per-student secret link instead (see Student.accessToken).
+model User {
+  id           String      @id @default(cuid())
+  name         String
+  email        String      @unique
+  passwordHash String
+  role         Role        @default(TEACHER)
+  classrooms   Classroom[]
+  createdAt    DateTime    @default(now())
+}
+
+model Classroom {
+  id        String              @id @default(cuid())
+  name      String
+  subject   String?
+  joinCode  String              @unique @default(cuid())
+  teacherId String
+  teacher   User                @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  students  Student[]
+  columns   AssignmentColumn[]
+  createdAt DateTime            @default(now())
+  updatedAt DateTime            @updatedAt
+}
+
+model Student {
+  id          String       @id @default(cuid())
+  classroomId String
+  classroom   Classroom    @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  number      Int
+  name        String
+  email       String?
+  // Unguessable capability token. The URL /s/[accessToken] logs the
+  // student in as themselves — no password needed. Regenerable by the teacher.
+  accessToken String       @unique @default(cuid())
+  // Optional extra PIN a teacher can set per student for shared-device classrooms.
+  pinHash     String?
+  submissions Submission[]
+  createdAt   DateTime     @default(now())
+
+  @@unique([classroomId, number])
+}
+
+// A "column" the teacher adds — e.g. "Homework 1", "Reading Quiz".
+model AssignmentColumn {
+  id          String       @id @default(cuid())
+  classroomId String
+  classroom   Classroom    @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  title       String
+  order       Int          @default(0)
+  createdAt   DateTime     @default(now())
+  submissions Submission[]
+}
+
+// One checkbox: did `student` submit `column`.
+model Submission {
+  id        String            @id @default(cuid())
+  studentId String
+  student   Student           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  columnId  String
+  column    AssignmentColumn  @relation(fields: [columnId], references: [id], onDelete: Cascade)
+  checked   Boolean           @default(false)
+  updatedAt DateTime          @updatedAt
+
+  @@unique([studentId, columnId])
+}

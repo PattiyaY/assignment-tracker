@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url("https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  background: #F7F6F3;
+  color: #1C2321;
+}
+
+::selection {
+  background: #C7952B33;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #DFDCD3;
+  border-radius: 10px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.55rem 1rem;
+  border-radius: 6px;
+  transition: background-color .15s ease, border-color .15s ease, opacity .15s ease;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: #2B4132;
+  color: #F7F6F3;
+}
+.btn-primary:hover { background: #23362A; }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-secondary {
+  background: transparent;
+  color: #1C2321;
+  border: 1px solid #DFDCD3;
+}
+.btn-secondary:hover { border-color: #B5654A; color: #B5654A; }
+
+.btn-danger {
+  background: transparent;
+  color: #B5654A;
+  border: 1px solid #DFDCD3;
+}
+.btn-danger:hover { background: #B5654A; color: #fff; border-color: #B5654A; }
+
+.input {
+  width: 100%;
+  border: 1px solid #DFDCD3;
+  border-radius: 6px;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.9rem;
+  background: #fff;
+}
+.input:focus {
+  outline: 2px solid #2B4132;
+  outline-offset: 1px;
+  border-color: #2B4132;
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #6B6960;
+}
