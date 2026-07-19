@@ -8,22 +8,22 @@ async function main() {
   const teacherPasswordHash = await bcrypt.hash("password123", 12);
 
   const admin = await prisma.user.upsert({
-    where: { email: "admin@classtrack.local" },
+    where: { email: "admin@classtrack.com" },
     update: { passwordHash: adminPasswordHash, role: "ADMIN" },
     create: {
       name: "System Admin",
-      email: "admin@classtrack.local",
+      email: "admin@classtrack.com",
       passwordHash: adminPasswordHash,
       role: "ADMIN",
     },
   });
 
   const teacher = await prisma.user.upsert({
-    where: { email: "teacher@example.com" },
+    where: { email: "teacher@classtrack.com" },
     update: { passwordHash: teacherPasswordHash },
     create: {
       name: "Alex Rivera",
-      email: "teacher@example.com",
+      email: "teacher@classtrack.com",
       passwordHash: teacherPasswordHash,
       role: "TEACHER",
     },
@@ -73,8 +73,8 @@ async function main() {
   }
 
   console.log("Seeded demo data.");
-  console.log("Admin login: admin@classtrack.local / Admin1234!");
-  console.log("Teacher login: teacher@example.com / password123");
+  console.log("Admin login: admin@classtrack.com / Admin1234!");
+  console.log("Teacher login: teacher@classtrack.com / password123");
   console.log(
     "Student links:",
     classroom.students.map((s) => `${s.name}: /s/${s.accessToken}`),
